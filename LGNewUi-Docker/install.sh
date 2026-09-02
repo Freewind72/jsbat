@@ -3,7 +3,7 @@ set -e
 
 REPO_URL="https://github.com/Freewind72/LGNewUi-Docker.git"
 TEMP_DIR="LGNewUi-Docker"
-ZIP_URL="https://github.com/Freewind72/jsbat/raw/main/LGNewUi-Docker/loaders.zip"
+ZIP_URL="https://cdn.jsdelivr.net/gh/Freewind72/jsbat@main/LGNewUi-Docker/loaders.zip"
 
 echo "=========================================="
 echo "LGNewUi Docker 部署脚本"
