@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-CONFIG_ZIP_URL="https://github.com/Freewind72/jsbat/raw/main/LGNewUi-Docker/LGNewUi.zip"
-LOADERS_ZIP_URL="https://github.com/Freewind72/jsbat/raw/main/LGNewUi-Docker/loaders.zip"
+CONFIG_ZIP_URL="https://cdn.jsdelivr.net/gh/Freewind72/jsbat@main/LGNewUi-Docker/LGNewUi.zip"
+LOADERS_ZIP_URL="https://cdn.jsdelivr.net/gh/Freewind72/jsbat@main/LGNewUi-Docker/loaders.zip"
 TEMP_DIR="LGNewUi-Docker"
 
 echo "=========================================="
