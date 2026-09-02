@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/Freewind72/LGNewUi-Docker.git"
+CONFIG_ZIP_URL="https://github.com/Freewind72/jsbat/raw/main/LGNewUi-Docker/LGNewUi.zip"
+LOADERS_ZIP_URL="https://github.com/Freewind72/jsbat/raw/main/LGNewUi-Docker/loaders.zip"
 TEMP_DIR="LGNewUi-Docker"
-ZIP_URL="https://github.com/Freewind72/jsbat/raw/main/LGNewUi-Docker/loaders.zip"
 
 echo "=========================================="
 echo "LGNewUi Docker 部署脚本"
@@ -14,8 +14,27 @@ if [ -d "$TEMP_DIR" ]; then
     rm -rf "$TEMP_DIR"
 fi
 
-echo "从 GitHub 拉取 Docker 配置文件..."
-git clone "$REPO_URL"
+extract_zip() {
+    local zip_file=$1
+    if command -v unzip >/dev/null 2>&1; then
+        unzip -o "$zip_file" -d .
+    else
+        if command -v python3 >/dev/null 2>&1; then
+            python3 -c "import zipfile; zipfile.ZipFile('$zip_file').extractall('.')"
+        else
+            echo "错误：未安装 unzip 或 python3，无法解压"
+            echo "请手动安装 unzip：apt-get install unzip"
+            exit 1
+        fi
+    fi
+}
+
+echo "下载 Docker 配置文件..."
+curl -fsSL "$CONFIG_ZIP_URL" -o config.zip
+
+echo "解压 Docker 配置文件..."
+extract_zip config.zip
+rm -f config.zip
 
 echo "移动文件到当前目录..."
 cp -r "$TEMP_DIR"/* .
@@ -30,23 +49,12 @@ else
     echo "创建 loaders 目录..."
     mkdir -p loaders
 
-    if command -v unzip >/dev/null 2>&1; then
-        echo "下载并解压 loaders.zip..."
-        curl -fsSL "$ZIP_URL" -o loaders.zip
-        unzip -o loaders.zip -d .
-        rm -f loaders.zip
-    else
-        echo "未检测到 unzip，尝试使用 Python 解压..."
-        if command -v python3 >/dev/null 2>&1; then
-            curl -fsSL "$ZIP_URL" -o loaders.zip
-            python3 -c "import zipfile; zipfile.ZipFile('loaders.zip').extractall('.')"
-            rm -f loaders.zip
-        else
-            echo "错误：未安装 unzip 或 python3，无法解压 loaders.zip"
-            echo "请手动安装 unzip：apt-get install unzip"
-            exit 1
-        fi
-    fi
+    echo "下载 loaders.zip..."
+    curl -fsSL "$LOADERS_ZIP_URL" -o loaders.zip
+
+    echo "解压 loaders.zip..."
+    extract_zip loaders.zip
+    rm -f loaders.zip
 fi
 
 echo "停止并删除旧容器..."
