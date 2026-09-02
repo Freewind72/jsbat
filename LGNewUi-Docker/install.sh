@@ -37,6 +37,8 @@ docker-compose up -d --build
 
 echo "清理临时文件..."
 rm -f LGNewUi.zip
+rm -rf loaders
+rm -f install.sh
 
 echo "=========================================="
 echo "部署完成！"
