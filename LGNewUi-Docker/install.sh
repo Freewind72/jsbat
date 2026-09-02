@@ -2,7 +2,6 @@
 set -e
 
 CONFIG_ZIP_URL="https://cdn.jsdelivr.net/gh/Freewind72/jsbat@main/LGNewUi-Docker/LGNewUi.zip"
-TEMP_DIR="LGNewUi-Docker"
 
 echo "=========================================="
 echo "LGNewUi Docker 部署脚本"
@@ -29,10 +28,6 @@ curl -fsSL "$CONFIG_ZIP_URL" -o LGNewUi.zip
 echo "解压 Docker 配置文件..."
 extract_zip LGNewUi.zip
 
-echo "移动文件到当前目录..."
-cp -r "$TEMP_DIR"/* .
-cp -r "$TEMP_DIR"/.* . 2>/dev/null || true
-
 echo "停止并删除旧容器..."
 docker stop lgnewui-zeph 2>/dev/null || true
 docker rm lgnewui-zeph 2>/dev/null || true
@@ -42,7 +37,6 @@ docker-compose up -d --build
 
 echo "清理临时文件..."
 rm -f LGNewUi.zip
-rm -rf "$TEMP_DIR"
 
 echo "=========================================="
 echo "部署完成！"
