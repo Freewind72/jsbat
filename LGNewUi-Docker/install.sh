@@ -47,6 +47,36 @@ fi
 
 echo "环境检测通过"
 
+# ============================================
+# 检测服务器位置，选择构建镜像源
+# ============================================
+echo "检测服务器位置..."
+COUNTRY=$(curl -s --connect-timeout 3 https://ipinfo.io/country 2>/dev/null || echo "UNKNOWN")
+
+if [ "$COUNTRY" = "CN" ]; then
+    echo "检测到国内服务器，测试镜像源延迟..."
+    
+    ALIYUN_TIME=$(curl -s -o /dev/null -w "%{time_total}" --connect-timeout 3 -r 0-1023 https://mirrors.aliyun.com 2>/dev/null || echo "999")
+    TENCENT_TIME=$(curl -s -o /dev/null -w "%{time_total}" --connect-timeout 3 -r 0-1023 https://mirrors.tencent.com 2>/dev/null || echo "999")
+    
+    ALIYUN_MS=$(awk "BEGIN {printf \"%.0f\", $ALIYUN_TIME * 1000}")
+    TENCENT_MS=$(awk "BEGIN {printf \"%.0f\", $TENCENT_TIME * 1000}")
+    
+    echo "阿里云镜像 (mirrors.aliyun.com): ${ALIYUN_MS}ms"
+    echo "腾讯云镜像 (mirrors.tencent.com): ${TENCENT_MS}ms"
+    
+    if [ "$ALIYUN_MS" -le "$TENCENT_MS" ]; then
+        export APT_MIRROR="mirrors.aliyun.com"
+        echo "选择阿里云镜像源"
+    else
+        export APT_MIRROR="mirrors.tencent.com"
+        echo "选择腾讯云镜像源"
+    fi
+else
+    echo "检测到海外服务器 (${COUNTRY})，使用官方源"
+    export APT_MIRROR="deb.debian.org"
+fi
+
 test_latency() {
     local url=$1
     local time=$(curl -fsSL -r 0-1023 -o /dev/null -w "%{time_total}" --connect-timeout 5 --max-time 5 "$url" 2>/dev/null)
