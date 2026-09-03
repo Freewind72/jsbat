@@ -102,62 +102,52 @@ LATENCY6=$(test_latency "$CDN6")
 LATENCY7=$(test_latency "$CDN7")
 LATENCY8=$(test_latency "$CDN8")
 
-echo "CDN1 (jsDelivr) 延迟: ${LATENCY1}ms"
-echo "CDN2 (GitHub Raw) 延迟: ${LATENCY2}ms"
-echo "CDN3 (jasonzeng) 延迟: ${LATENCY3}ms"
-echo "CDN4 (gh-proxy) 延迟: ${LATENCY4}ms"
-echo "CDN5 (gh-proxy v4) 延迟: ${LATENCY5}ms"
-echo "CDN6 (gh-proxy v6) 延迟: ${LATENCY6}ms"
-echo "CDN7 (gh-proxy cdn) 延迟: ${LATENCY7}ms"
+echo "CDN1 (jsDelivr)      延迟: ${LATENCY1}ms"
+echo "CDN2 (GitHub Raw)     延迟: ${LATENCY2}ms"
+echo "CDN3 (jasonzeng)      延迟: ${LATENCY3}ms"
+echo "CDN4 (gh-proxy)       延迟: ${LATENCY4}ms"
+echo "CDN5 (gh-proxy v4)    延迟: ${LATENCY5}ms"
+echo "CDN6 (gh-proxy v6)    延迟: ${LATENCY6}ms"
+echo "CDN7 (gh-proxy cdn)   延迟: ${LATENCY7}ms"
 echo "CDN8 (gh-proxy axisnow) 延迟: ${LATENCY8}ms"
 
+# 找出最低延迟作为推荐
 MIN_LATENCY=$LATENCY1
-CONFIG_ZIP_URL="$CDN1"
-CDN_NAME="CDN1 (jsDelivr)"
+BEST_CDN="1"
+if [ "$LATENCY2" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY2; BEST_CDN="2"; fi
+if [ "$LATENCY3" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY3; BEST_CDN="3"; fi
+if [ "$LATENCY4" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY4; BEST_CDN="4"; fi
+if [ "$LATENCY5" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY5; BEST_CDN="5"; fi
+if [ "$LATENCY6" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY6; BEST_CDN="6"; fi
+if [ "$LATENCY7" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY7; BEST_CDN="7"; fi
+if [ "$LATENCY8" -lt "$MIN_LATENCY" ]; then MIN_LATENCY=$LATENCY8; BEST_CDN="8"; fi
 
-if [ "$LATENCY2" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY2
-    CONFIG_ZIP_URL="$CDN2"
-    CDN_NAME="CDN2 (GitHub Raw)"
-fi
+echo ""
+echo "请选择下载线路 (推荐 CDN${BEST_CDN}):"
+echo "  [1] jsDelivr         ${LATENCY1}ms"
+echo "  [2] GitHub Raw       ${LATENCY2}ms"
+echo "  [3] jasonzeng        ${LATENCY3}ms"
+echo "  [4] gh-proxy         ${LATENCY4}ms"
+echo "  [5] gh-proxy v4      ${LATENCY5}ms"
+echo "  [6] gh-proxy v6      ${LATENCY6}ms"
+echo "  [7] gh-proxy cdn     ${LATENCY7}ms"
+echo "  [8] gh-proxy axisnow ${LATENCY8}ms"
+echo -n "输入数字 (1-8) 或直接回车选择推荐: "
+read -r CHOICE
 
-if [ "$LATENCY3" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY3
-    CONFIG_ZIP_URL="$CDN3"
-    CDN_NAME="CDN3 (jasonzeng)"
-fi
+case "${CHOICE:-$BEST_CDN}" in
+    1) CONFIG_ZIP_URL="$CDN1"; CDN_NAME="CDN1 (jsDelivr)" ;;
+    2) CONFIG_ZIP_URL="$CDN2"; CDN_NAME="CDN2 (GitHub Raw)" ;;
+    3) CONFIG_ZIP_URL="$CDN3"; CDN_NAME="CDN3 (jasonzeng)" ;;
+    4) CONFIG_ZIP_URL="$CDN4"; CDN_NAME="CDN4 (gh-proxy)" ;;
+    5) CONFIG_ZIP_URL="$CDN5"; CDN_NAME="CDN5 (gh-proxy v4)" ;;
+    6) CONFIG_ZIP_URL="$CDN6"; CDN_NAME="CDN6 (gh-proxy v6)" ;;
+    7) CONFIG_ZIP_URL="$CDN7"; CDN_NAME="CDN7 (gh-proxy cdn)" ;;
+    8) CONFIG_ZIP_URL="$CDN8"; CDN_NAME="CDN8 (gh-proxy axisnow)" ;;
+    *) echo "无效输入，使用推荐 CDN${BEST_CDN}"; CONFIG_ZIP_URL="$CDN${BEST_CDN}" ;;
+esac
 
-if [ "$LATENCY4" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY4
-    CONFIG_ZIP_URL="$CDN4"
-    CDN_NAME="CDN4 (gh-proxy)"
-fi
-
-if [ "$LATENCY5" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY5
-    CONFIG_ZIP_URL="$CDN5"
-    CDN_NAME="CDN5 (gh-proxy v4)"
-fi
-
-if [ "$LATENCY6" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY6
-    CONFIG_ZIP_URL="$CDN6"
-    CDN_NAME="CDN6 (gh-proxy v6)"
-fi
-
-if [ "$LATENCY7" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY7
-    CONFIG_ZIP_URL="$CDN7"
-    CDN_NAME="CDN7 (gh-proxy cdn)"
-fi
-
-if [ "$LATENCY8" -lt "$MIN_LATENCY" ]; then
-    MIN_LATENCY=$LATENCY8
-    CONFIG_ZIP_URL="$CDN8"
-    CDN_NAME="CDN8 (gh-proxy axisnow)"
-fi
-
-echo "选择 $CDN_NAME"
+echo "已选择: $CDN_NAME"
 
 extract_zip() {
     local zip_file=$1
