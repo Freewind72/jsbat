@@ -116,18 +116,16 @@ echo "解压 Docker 配置文件..."
 extract_zip LGNewUi.zip
 
 echo "停止并删除旧容器..."
-docker stop lgnewui-zeph 2>/dev/null || true
-docker rm lgnewui-zeph 2>/dev/null || true
+docker compose down 2>/dev/null || true
 
 echo "构建并启动新容器..."
 docker-compose up -d --build
 
 echo "清理临时文件..."
 rm -f LGNewUi.zip
-rm -rf loaders
 rm -f install.sh
 
 echo "=========================================="
 echo "部署完成！"
-docker ps | grep lgnewui-zeph || echo "容器未运行，请检查日志"
+docker ps | grep lgnewui_zeph || echo "容器未运行，请检查日志"
 echo "=========================================="
