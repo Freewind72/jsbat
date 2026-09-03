@@ -14,14 +14,49 @@ echo "=========================================="
 echo "LGNewUi Docker 部署脚本"
 echo "=========================================="
 
+echo "检测运行环境..."
+
+if ! command -v docker >/dev/null 2>&1; then
+    echo "错误：未检测到 Docker，请先安装 Docker"
+    exit 1
+fi
+
+if command -v docker compose >/dev/null 2>&1; then
+    echo "Docker Compose: 已安装 (docker compose)"
+elif command -v docker-compose >/dev/null 2>&1; then
+    echo "Docker Compose: 已安装 (docker-compose)"
+else
+    echo "Docker Compose 未安装，正在自动安装..."
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+        -o /usr/local/lib/docker/cli-plugins/docker-compose
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+    if command -v docker compose >/dev/null 2>&1; then
+        echo "Docker Compose 安装成功 (docker compose)"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        echo "Docker Compose 安装成功 (docker-compose)"
+    else
+        echo "自动安装失败，请手动安装："
+        echo "  mkdir -p /usr/local/lib/docker/cli-plugins"
+        echo "  curl -fsSL https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m) -o /usr/local/lib/docker/cli-plugins/docker-compose"
+        echo "  chmod +x /usr/local/lib/docker/cli-plugins/docker-compose"
+        exit 1
+    fi
+fi
+
+echo "环境检测通过"
+
 test_latency() {
     local url=$1
-    local start=$(date +%s%N)
-    curl -fsSL -o /dev/null -w "%{http_code}" "$url" >/dev/null 2>&1
-    local status=$?
-    local end=$(date +%s%N)
-    if [ $status -eq 0 ]; then
-        echo $(( (end - start) / 1000000 ))
+    local time=$(curl -fsSL -r 0-1023 -o /dev/null -w "%{time_total}" --connect-timeout 5 --max-time 5 "$url" 2>/dev/null)
+    if [ -n "$time" ] && [ "$time" != "0" ]; then
+        local ms=$(awk "BEGIN {printf \"%.0f\", $time * 1000}")
+        if [ "$ms" -ge 5000 ]; then
+            echo 99999
+        else
+            echo "$ms"
+        fi
     else
         echo 99999
     fi
