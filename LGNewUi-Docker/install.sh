@@ -79,10 +79,10 @@ fi
 
 test_latency() {
     local url=$1
-    local time=$(curl -fsSL -r 0-1023 -o /dev/null -w "%{time_total}" --connect-timeout 5 --max-time 5 "$url" 2>/dev/null)
+    local time=$(curl -fsSL -r 0-1023 -o /dev/null -w "%{time_total}" --connect-timeout 3 --max-time 3 "$url" 2>/dev/null)
     if [ -n "$time" ] && [ "$time" != "0" ]; then
         local ms=$(awk "BEGIN {printf \"%.0f\", $time * 1000}")
-        if [ "$ms" -ge 5000 ]; then
+        if [ "$ms" -ge 3000 ]; then
             echo 99999
         else
             echo "$ms"
@@ -170,6 +170,12 @@ curl -fsSL "$CONFIG_ZIP_URL" -o LGNewUi.zip
 echo "解压 Docker 配置文件..."
 extract_zip LGNewUi.zip
 
+if [ ! -f .env ]; then
+    echo "错误：未检测到 .env 配置文件，安装终止"
+    echo "请确保项目包中包含 .env 文件"
+    exit 1
+fi
+
 echo "停止并删除旧容器..."
 docker compose down 2>/dev/null || true
 
@@ -177,7 +183,21 @@ echo "构建并启动新容器..."
 docker-compose up -d --build
 
 echo "清理临时文件..."
-rm -f LGNewUi.zip
+echo "白名单保留: docker-compose.yml, Dockerfile, .env"
+if [ -f LGNewUi.zip ]; then
+    unzip -l LGNewUi.zip 2>/dev/null | tail -n +4 | head -n -2 | awk '{print $NF}' | while read -r file; do
+        case "$file" in
+            docker-compose.yml|Dockerfile|.env)
+                echo "保留: $file"
+                ;;
+            *)
+                echo "删除: $file"
+                rm -f "$file"
+                ;;
+        esac
+    done
+    rm -f LGNewUi.zip
+fi
 rm -f install.sh
 
 echo "=========================================="
